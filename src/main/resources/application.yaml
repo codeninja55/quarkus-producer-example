@@ -1,0 +1,32 @@
+quarkus:
+  log:
+    level: "INFO"
+    console:
+      enable: true
+      level: "INFO"
+      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{2.}] (%t) => %s%e%n"
+    category:
+      "io.monster.kafka.streams.producer":
+        level: "DEBUG"
+      "*":
+        use-parent-handlers: true
+
+kafka:
+  bootstrap:
+    servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+mp:
+  messaging:
+    outgoing:
+      temperature-values:
+        connector: smallrye-kafka
+        key:
+          serializer: org.apache.kafka.common.serialization.IntegerSerializer
+        value:
+          serializer: org.apache.kafka.common.serialization.StringSerializer
+      weather-stations:
+        connector: smallrye-kafka
+        key:
+          serializer: org.apache.kafka.common.serialization.IntegerSerializer
+        value:
+          serializer: org.apache.kafka.common.serialization.StringSerializer
