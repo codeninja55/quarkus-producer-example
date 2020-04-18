@@ -15,7 +15,6 @@ import java.math.RoundingMode
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.TimeUnit
-import java.util.stream.Collectors
 import javax.enterprise.context.ApplicationScoped
 
 
@@ -51,20 +50,18 @@ class ValuesGenerator {
                 val temperature: Double = BigDecimal.valueOf(random.nextGaussian() * 15 + station.averageTemperature)
                     .setScale(1, RoundingMode.HALF_UP)
                     .toDouble()
-                LOG.info("station: {}, temperature: {}", station.name, temperature)
-                KafkaRecord.of(station.id, Instant.now().toString() + ";" + temperature)
+                LOG.info("station: ${station.name}, temperature: $temperature")
+                KafkaRecord.of(station.id, "${Instant.now()};$temperature")
             }
     }
 
     @Outgoing("weather-stations")
     fun weatherStations(): Flowable<KafkaRecord<Int, String>> {
-        val stationsAsJson: List<KafkaRecord<Int, String>> = stations.stream()
+        val stationsAsJson: List<KafkaRecord<Int, String>> = stations
             .map { s: WeatherStation ->
-                KafkaMessage.of(
-                    s.id,
-                    "{ \"id\" : ${s.id}, \"name\" : \"${s.name}\" }")
+                KafkaMessage.of(s.id, "{ \"id\" : ${s.id}, \"name\" : \"${s.name}\" }")
             }
-            .collect(Collectors.toList())
+
         return Flowable.fromIterable(stationsAsJson)
     }
 
